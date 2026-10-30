@@ -1,0 +1,11 @@
+build/
+*.o
+*.d
+*.elf
+*.map
+*.sav
+*.gba
+*.zip
+__pycache__/
+builder-dist/
+*.spec

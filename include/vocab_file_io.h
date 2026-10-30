@@ -1,0 +1,170 @@
+// vocab_file_io.h — SD/FAT-backed vocab file boundary.
+#pragma once
+
+#include "vocab.h"
+#include "flashcard_angle.h"
+
+constexpr int VOCAB_FILE_BUFFER_LEN = 2048;   // legacy host regression scratch; no ROM fallback
+constexpr int VOCAB_EXPORT_BUFFER_LEN = 4096; // host/stub export scratch only
+// LOAD LIST has no file-count limit: RAM keeps a window of this many names
+// and rereads the directory when the selection leaves it.
+constexpr int VOCAB_MAX_BROWSER_FILES = 32;
+constexpr int VOCAB_FILENAME_MAX = 64;
+
+// Mount/scan FatFS storage. The ROM discovers TXT only under /gbavocab.
+// Legacy non-device regression tests may opt into deterministic fixtures.
+bool vocab_file_init();
+bool vocab_file_sd_ready();
+bool vocab_file_loaded_from_sd();
+
+int vocab_file_count();
+const char* vocab_file_name(int index);
+
+// Load selected file. If SD is mounted on GBA, this streams the file once and
+// fills vf.line_offsets/field[] without copying the file into RAM. Missing SD
+// or files fail without changing the active list; the ROM has no sample fallback.
+bool vocab_file_load(const char* filename, VocabFile& vf,
+                     char* fallback_buf, int fallback_len, int& fallback_used);
+
+// Read one vocab row from the currently loaded source: fseek+read one line on
+// SD, or memory-buffer lookup for fallback/host.
+bool vocab_file_show(const VocabFile& vf, const char* fallback_buf, int fallback_used,
+                     int line_idx, LineBuf& out);
+
+bool vocab_file_raw_row(const VocabFile& vf, const char* fallback, int used,
+                        int index, char out[VOCAB_RAW_LINE_MAX]);
+
+// Central configuration (GBAVOCAB.SYS): the loaded list's pair, mode and
+// linked dictionary are written now; clears pair_dirty on success.
+bool vocab_file_save_settings(VocabFile& vf);
+// Remember / recall the last opened list (LOAD LIST cursor at the next boot).
+bool vocab_file_remember_last(const char* filename);
+int vocab_file_last_list_index();
+// LOAD LIST index of a TXT name, or -1.
+int vocab_file_find(const char* filename);
+const char* vocab_file_loaded_name();
+// Secret Settings > Letter Box, kept in GBAVOCAB.SYS (0 Off, 1 On, 2 only L + Up/Down).
+int vocab_file_letter_box();
+bool vocab_file_set_letter_box(int mode);
+// Secret Settings > Save list on menu (default On).
+bool vocab_file_save_on_menu();
+bool vocab_file_set_save_on_menu(bool on);
+// Secret Settings > Save after entry changes (default On): Add / Edit / Delete
+// save the list at once; Off keeps them in RAM (128 rows) until Start.
+bool vocab_file_save_after_changes();
+bool vocab_file_set_save_after_changes(bool on);
+// Settings > Flashcard angle (GBAVOCAB.SYS); Normal without a card.
+FlashcardAngle vocab_file_flashcard_angle();
+bool vocab_file_set_flashcard_angle(FlashcardAngle angle);
+#if !defined(__DEVKITARM__) && !defined(VOCAB_HOST_FATFS)
+void vocab_file_flashcard_angle_for_tests(FlashcardAngle angle);   // host renderer tests (no card)
+#endif
+// Settings > Hide elements (GBAVOCAB.SYS, all shown by default): parts of the
+// learning screen left out; everything else keeps its place.
+enum class HiddenElement { mode, word_count, boxes };
+constexpr int HIDDEN_ELEMENTS = 3;
+bool vocab_file_hidden(HiddenElement element);
+bool vocab_file_set_hidden(HiddenElement element, bool hidden);
+#if !defined(__DEVKITARM__) && !defined(VOCAB_HOST_FATFS)
+void vocab_file_hidden_for_tests(HiddenElement element, bool hidden);
+#endif
+// Idle work RAM (the reindex scratch, ~77 KiB) for Import: valid only while
+// no list is being loaded or saved.
+unsigned char* vocab_file_work_ram(unsigned& size);
+// Reread the LOAD LIST names after files were added to /gbavocab.
+void vocab_file_rescan();
+
+enum class EntryMutation { add, edit, remove };
+// RAM-only confirmed mutation: bounded to 128 concurrently changed/added rows.
+// Deletions consume no row slots. Full capacity rejects without changing data.
+constexpr int VOCAB_PENDING_ROWS = 128;
+bool vocab_file_defer(VocabFile& vf, EntryMutation operation, int target,
+                      const char* raw_row, int& result_index);
+bool vocab_file_create(const char* filename, VocabFile& vf);
+bool vocab_file_next_unused_name(char out[VOCAB_FILENAME_MAX]);
+// Transactional on-disk mutation. On precommit failure the live index is untouched.
+// result_index is in the committed grouped order; -1 denotes an empty list.
+bool vocab_file_mutate(VocabFile& vf, EntryMutation operation, int target,
+                       const char* raw_row, int& result_index);
+
+struct VocabIoStats {
+    uint32_t file_opens;
+    uint32_t seeks;
+    uint32_t read_calls;
+    uint32_t bytes_read;
+    uint32_t write_calls;
+    uint32_t bytes_written;
+    uint32_t closes;
+    uint32_t renames;
+    uint32_t unlinks;
+    uint32_t index_scans;
+    uint32_t full_display_parses;
+};
+
+void vocab_file_io_reset_stats();
+VocabIoStats vocab_file_io_stats();
+
+enum VocabIoFailurePoint {
+    VOCAB_IO_FAIL_NONE = 0,
+    VOCAB_IO_FAIL_WRITE,
+    VOCAB_IO_FAIL_CLOSE,
+    VOCAB_IO_FAIL_BACKUP_RENAME,
+    VOCAB_IO_FAIL_REPLACEMENT_RENAME,
+    VOCAB_IO_FAIL_REINDEX,
+    VOCAB_IO_FAIL_BACKUP_UNLINK
+};
+
+struct VocabTransactionTestResult {
+    bool success;
+    bool dirty;
+    bool original_valid;
+    bool backup_valid;
+    bool temporary_valid;
+    VocabIoStats stats;
+};
+
+VocabTransactionTestResult vocab_file_transaction_for_tests(VocabIoFailurePoint failure);
+bool vocab_file_sidecar_name_for_tests(const char* original, const char* suffix,
+                                       char out[VOCAB_FILENAME_MAX]);
+
+// Host regression instrumentation for the bounded current-card cache. A miss
+// means the source row had to be read and parsed; hits still refresh field.
+void vocab_file_cache_reset_stats_for_tests();
+int vocab_file_cache_misses_for_tests();
+
+// Host lifecycle regression for the persistent SD source handle: repeated card
+// transitions reuse one open, while save closes and then reopens it.
+VocabIoStats vocab_file_persistent_source_for_tests();
+bool vocab_file_close_failure_keeps_source_open_for_tests();
+
+// Simulate the post-commit reopen boundary. Even when reopening fails, the
+// in-memory offsets must already describe the committed replacement and must
+// not remain dirty/retryable against the regrouped TXT.
+bool vocab_file_finalize_committed_save_for_tests(VocabFile& live,
+                                                   const VocabFile& reindexed,
+                                                   bool reopen_succeeds);
+
+// Run the same chunked sequential scanner used by FatFS against a host memory
+// source. This keeps buffer-boundary and call-count regressions testable.
+int vocab_file_scan_buffered_for_tests(const char* data, int data_len, int chunk_size,
+                                       VocabFile& vf, int& bulk_read_calls);
+
+// Save/export current fields as dict.cc-style grouped TXT. On GBA+SD this full
+// rewrites to a temporary file, then replaces the original. On fallback/host it
+// writes grouped text into out_buf for testability. Normal SD saves read source
+// rows for construction, write the temporary, then scan the installed file once
+// against intended counts/boxes/offsets and the identity fused into writes.
+// No independent source-content or pre-install exact-row comparison: callers
+// must not externally modify the loaded TXT. Recovery/failure paths may reread.
+bool vocab_file_save_grouped(VocabFile& vf, const char* fallback_buf, int fallback_used,
+                             char* out_buf, int out_len, int& out_used);
+
+// Last save index installation is independent of the reopen/success boolean.
+// Callers must remap navigation whenever true, including a failed list switch.
+bool vocab_file_save_installed_index();
+const char* vocab_file_last_error();
+
+// Backwards-compatible small-sample helpers used by older tests.
+bool vocab_file_read_builtin_or_stub(const char* filename, char* out, int out_len, int& out_used);
+bool vocab_file_export_grouped_stub(const VocabFile& vf, const char* source, int source_len,
+                                    char* out, int out_len, int& out_used);
