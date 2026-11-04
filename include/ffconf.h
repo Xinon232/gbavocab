@@ -293,4 +293,12 @@
 
 
 
+/* gbaSD: GBASD_FF_MULTI_BUF stays 0 (the window, one sector per call). Its
+/  2 KiB buffer (4 sectors) does not fit: EWRAM keeps a 20 KiB reserve
+/  (tests/check_entry_memory.py; 20512 bytes free before it) and IWRAM holds
+/  the stack budget. It only speeds up new folders on cards with large exFAT
+/  clusters and the free-space count; gbasd_alloc_hint (vocab_file_io.cpp)
+/  makes the first save after a start fast without it. */
+#define GBASD_FF_MULTI_BUF 0
+
 /*--- End of configuration options ---*/

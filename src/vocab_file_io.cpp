@@ -260,6 +260,7 @@ VocabTransactionTestResult vocab_file_transaction_for_tests(VocabIoFailurePoint 
 #include "app_config.h"
 #include "dictionary_handle.h"
 #include "exfat_repair.h"
+#include "alloc_hint.h"
 static FATFS s_fatfs;
 // exFAT: entry sets a power cut (or a failed write) left half written in the
 // root, /gbavocab or GBAVOCAB.SYS make FatFs refuse the folder (FR_INT_ERR).
@@ -611,6 +612,14 @@ bool vocab_file_init()
         // exFAT: repair the root, /gbavocab and GBAVOCAB.SYS (half-written
         // entry sets of a power cut) before anything reads or creates there.
         exfat_repair_dir(&s_fatfs, ConfigStore::directory(), 1);
+        // exFAT keeps no free-space hint: start FatFs' free-cluster search
+        // at the end of /gbavocab's files (lists, .dict, GBAVOCAB.SYS), where
+        // the saves go, not at cluster 2. Nothing on FAT32 (FSInfo) or FAT16.
+#if defined(__DEVKITARM__) || defined(VOCAB_ROOT_DIRECTORY)
+        gbasd_alloc_hint(&s_fatfs, "/gbavocab");
+#else
+        gbasd_alloc_hint(&s_fatfs, "/");
+#endif
         scan_sd_root();
     }
 #else

@@ -144,7 +144,7 @@ struct In {
         }
         return buf[pos++];
     }
-    uint32_t size() { return open ? uint32_t(f_size(&f)) : 0; }
+    uint64_t size() { return open ? uint64_t(f_size(&f)) : 0; }   // a source can be 4 GiB+ (exFAT)
     ~In() { if (open) f_close(&f); }
 };
 
@@ -402,7 +402,7 @@ __attribute__((noinline)) DictBuildError read_source(const char* source, const D
                                                      unsigned& runs, uint32_t& records, DictBuildStats& stats, Progress& progress) {
     In in;
     if (!in.start(source, w.io[0], BLOCK)) return DictBuildError::read;
-    uint32_t size = in.size(), consumed = 0;
+    uint64_t size = in.size(), consumed = 0;
     char path_f[64], path_b[64];
     temp_path(RF0, path_f); temp_path(RB0, path_b);
     Out f, b;

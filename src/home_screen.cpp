@@ -44,7 +44,7 @@ constexpr Topic topics[HOME_HELP_TOPICS] = {
 // gbareader's About order: the personal page first, then the license, then
 // one page per part made by others with its license.
 constexpr TextPage credits[HOME_CREDIT_PAGES] = {
-    {"Credits", {"gbavocab 10.0", "(c) 2026 Halim Jarrar", "GPL-3.0-or-later", "No warranty.", "#Source:", "github.com/Xinon232/gbavocab", "halimj.itch.io", "gba@halim-jarrar.de"}},
+    {"Credits", {"gbavocab 11.0", "(c) 2026 Halim Jarrar", "GPL-3.0-or-later", "No warranty.", "#Source:", "github.com/Xinon232/gbavocab", "halimj.itch.io", "gba@halim-jarrar.de"}},
     {"License", {"gbavocab is free software under", "the GNU GPL 3.0 or later", "(GPL-3.0-or-later), with", "no warranty; see the GPL.", "#Source code", "github.com/Xinon232/gbavocab", "Parts made by others and their", "licenses are on the next pages."}},
     {"Text and fonts", {"#Text renderer", "SuperFW by David Guillen Fandos", "License: GPL 3.0 or later", "#Fonts", "UNSCII by Viznut: GPL", "GNU Unifont: GPL 2.0 or later", "with the font embedding", "exception"}},
     {"Arabic font", {"Ghoulam Regular", "(C) 2025 Imad AlFil (mloukhiyye)", "License: CC BY 4.0", "", "Changed: converted to an 11 px", "bitmap font for gbavocab.", "#Source", "mloukhiyye.itch.io"}},

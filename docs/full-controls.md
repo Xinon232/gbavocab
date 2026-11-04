@@ -1,4 +1,4 @@
-# gbavocab 10.0 — full controls
+# gbavocab 11.0 — full controls
 
 Learn vocabulary with flashcards and five learning boxes, and create and edit your own word lists on your Game Boy Advance. This manual starts with what is hard to guess; the in-app Settings list (Select in the main menu) has the same topics.
 
@@ -31,7 +31,7 @@ Build `.dict` files from your own dict.cc or other UTF-8 TAB exports, either on 
 
 ## 1. Main menu, lists and learning
 
-One ROM runs on the SuperCard SD, EZ-Flash Omega (also the Definitive Edition; start the ROM from the SD card, not from NOR) or EverDrive GBA; the cart is detected at every start (hold L+R while it starts to use the SuperCard driver). Launch `gbavocab.gba` with your flashcart's loader. Back up your TXT lists before using any program that edits them. There is no built-in vocabulary; without an SD card this is reported, and Settings stays available.
+One ROM runs on the SuperCard SD, EZ-Flash Omega (also the Definitive Edition; start the ROM from the SD card, not from NOR) or EverDrive GBA; the cart is detected at every start (hold L+R while it starts to use the SuperCard driver). Launch `gbavocab.gba` with your flashcart's loader. The SD card can be FAT16, FAT32 or exFAT, of any size up to 2 TB. Back up your TXT lists before using any program that edits them. There is no built-in vocabulary; without an SD card this is reported, and Settings stays available.
 
 The main menu looks like gbamp3's lists: the title `gbavocab` at the top, then **Dictionaries** (with a book icon and a line under it), then every list in `/gbavocab` from A to Z (without `.txt`; case and accents do not change the order). The light-blue bar is the cursor; long names scroll sideways. The list you have open carries a play mark ▶. At start the cursor is on the list you opened last, also after switching the GBA off.
 
@@ -370,7 +370,7 @@ Back up your lists and dictionaries regularly. gbavocab comes with no warranty; 
 
 ## About / licence
 
-**gbavocab 10.0** · (c) 2026 Halim Jarrar · halimj.itch.io · gba@halim-jarrar.de
+**gbavocab 11.0** · (c) 2026 Halim Jarrar · halimj.itch.io · gba@halim-jarrar.de
 
 gbavocab is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License, version 3 or later (GPL-3.0-or-later). The full license text is in `LICENSE`. gbavocab comes with no warranty; see the GPL for details.
 

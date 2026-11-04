@@ -1,12 +1,12 @@
-# gbavocab 10.0
+# gbavocab 11.0
 
 Learn vocabulary with flashcards and five learning boxes, and create and edit your own word lists on your Game Boy Advance (SuperCard SD, EZ-Flash Omega or EverDrive GBA). Lists are plain dict.cc-style TXT files on the SD card; local dictionaries are indexed `.dict` files, built on a PC or on the GBA itself.
 
-This repository holds the complete source code of gbavocab 10.0. The ROM (free), the PC dictionary builder and the manual are available at **[halimj.itch.io](https://halimj.itch.io)**. The manual is also in this repository: [docs/gbavocab-full-controls.pdf](docs/gbavocab-full-controls.pdf) (source: [docs/full-controls.md](docs/full-controls.md)). What is new: [docs/releases/release-v10.0.md](docs/releases/release-v10.0.md).
+This repository holds the complete source code of gbavocab 11.0. The ROM (free), the PC dictionary builder and the manual are available at **[halimj.itch.io](https://halimj.itch.io)**. The manual is also in this repository: [docs/gbavocab-full-controls.pdf](docs/gbavocab-full-controls.pdf) (source: [docs/full-controls.md](docs/full-controls.md)). What is new: [docs/releases/release-v11.0.md](docs/releases/release-v11.0.md) (before: [10.0](docs/releases/release-v10.0.md)).
 
 ## Using it
 
-1. Copy `gbavocab.gba` to your card and start it with your firmware. The app checks at every start which cart it is on; hold **L+R** while it starts to use the SuperCard driver. The SD card can be FAT (FAT16/FAT32) or exFAT.
+1. Copy `gbavocab.gba` to your card and start it with your firmware. The app checks at every start which cart it is on; hold **L+R** while it starts to use the SuperCard driver. The SD card can be FAT (FAT16/FAT32) or exFAT, of any size up to 2 TB.
 2. Put your lists and dictionaries directly in `/gbavocab` at the SD-card root, or press **Start** in the main menu to import them from anywhere on the card. A list row is `word<TAB>translation`; an empty line starts the next learning box (Box 1 to Box 5). [sample file.txt](sample%20file.txt) has 20 English–Spanish entries.
 3. Words are typed with the GBAWriter typing system; learn it with [GBAWriter](https://github.com/Xinon232/gbawriter) first.
 
@@ -41,7 +41,7 @@ Generated files are committed, so the build needs nothing else. Their generators
 
 ## License
 
-gbavocab 10.0 · (c) 2026 Halim Jarrar · halimj.itch.io · gba@halim-jarrar.de
+gbavocab 11.0 · (c) 2026 Halim Jarrar · halimj.itch.io · gba@halim-jarrar.de
 
 gbavocab is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version (GPL-3.0-or-later). It is distributed WITHOUT ANY WARRANTY; see the GNU General Public License in [LICENSE](LICENSE) for details.
 
@@ -54,6 +54,6 @@ Parts made by others, in the order of the in-app Credits (Select > Credits):
 - Arabic font: Ghoulam Regular (C) 2025 Imad AlFil / mloukhiyye. License: CC BY 4.0. Changed: converted to an 11 px bitmap font — [source, license and extraction details](docs/arabic.md).
 - SD card drivers ([gbaSD](https://github.com/Xinon232/gbaSD), see [gbasd/CREDITS.md](gbasd/CREDITS.md)): SuperCard driver from SuperFW by David Guillen Fandos, GPL 3.0 or later; EZ-Flash Omega and EverDrive GBA drivers by Halim Jarrar (GPL 3.0 or later), written after the Omega kernel (Apache 2.0) and edio-gba by krikzz (MIT). File system: FatFs by ChaN, from gbaSD (`gbasd/fatfs`). License: FatFs (BSD style).
 - Engine: [Butano](https://github.com/GValiente/butano) by Gustavo Valiente (also `include/common_*` and `src/common_info.cpp` from its examples). License: zlib ([third_party/butano/LICENSE](third_party/butano/LICENSE)). Built with devkitPro / devkitARM.
-- UI font: the 5x7 glyphs of gbamp3 by Halim Jarrar (MIT, [references/gbamp3-font/LICENSE](references/gbamp3-font/LICENSE)).
+- UI font: the 5x7 glyphs of gbamp3 by Halim Jarrar (GPL-3.0-or-later, [references/gbamp3-font/LICENSE](references/gbamp3-font/LICENSE)).
 
 dict.cc is a separate website; gbavocab only reads and writes its TAB-separated vocabulary format. Respect the dict.cc terms for your own exports.

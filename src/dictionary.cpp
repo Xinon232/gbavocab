@@ -54,7 +54,10 @@ bool DictionaryCatalog::activate(int i,bool write){
  return true;
 }
 bool DictionaryCatalog::refresh(int i){if(!close())return false;return activate(i);}
-uint32_t DictionaryCatalog::size(int i){return activate(i)?uint32_t(f_size(&file_)):0;}
+// A .dict of 4 GiB or more (exFAT) reads as 0xFFFFFFFF: never valid (its
+// addition area is too large), instead of its size modulo 4 GiB.
+static uint32_t size32(FSIZE_t n){return n>FSIZE_t(0xFFFFFFFFu)?0xFFFFFFFFu:uint32_t(n);}
+uint32_t DictionaryCatalog::size(int i){return activate(i)?size32(f_size(&file_)):0;}
 bool DictionaryCatalog::read(int i,uint32_t at,void* output,unsigned n){
  if(!activate(i)||at>f_size(&file_)||n>f_size(&file_)-at)return false;
  auto out=static_cast<unsigned char*>(output);
@@ -67,7 +70,7 @@ bool DictionaryCatalog::read(int i,uint32_t at,void* output,unsigned n){
  }
  while(n){
   if(cache_at_==~0u||at<cache_at_||at-cache_at_>=cache_n_){
-   invalidate();uint32_t start=at&~255u;unsigned wanted=uint32_t(f_size(&file_))-start;if(wanted>256)wanted=256;
+   invalidate();uint32_t start=at&~255u;unsigned wanted=size32(f_size(&file_))-start;if(wanted>256)wanted=256;
    if(f_tell(&file_)!=start&&f_lseek(&file_,start)!=FR_OK){error_="Dictionary seek failed";return false;}
    unsigned done=0;while(done<wanted){UINT got=0;if(f_read(&file_,cache_+done,wanted-done,&got)!=FR_OK||!got){error_="Dictionary read failed";return false;}done+=got;}
    cache_at_=start;cache_n_=done;
